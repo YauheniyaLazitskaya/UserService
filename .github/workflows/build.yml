@@ -20,13 +20,13 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and run tests with Maven
-        env:
-          TESTCONTAINERS_NETWORK_MODE: bridge
-        run: mvn clean verify
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -34,12 +34,13 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Analyze with SonarQube
+
+      - name: Build, Test and Analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run:
-          mvn sonar:sonar
+        run: >
+          mvn -B clean verify sonar:sonar
           -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.organization=yauheniyalazitskaya
           -Dsonar.projectKey=YauheniyaLazitskaya_UserService
@@ -49,9 +50,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Determine Docker tag
+        id: docker_meta
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/paycardsystem:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/userservice:${{ steps.docker_meta.outputs.tag }}
