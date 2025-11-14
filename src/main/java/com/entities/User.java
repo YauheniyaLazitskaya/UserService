@@ -1,7 +1,6 @@
 package com.entities;
 
-import com.audit.AuditableEntity;
-import com.exceptions.PaymentCardException;
+import com.entities.audit.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;

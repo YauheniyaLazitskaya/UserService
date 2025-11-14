@@ -17,7 +17,6 @@ public class CacheConfig {
     public RedisCacheConfiguration cacheConfiguration() {
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                // 3. (Опционально, но полезно) Говорим ему не записывать даты как таймстэмпы (числа)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         GenericJackson2JsonRedisSerializer redisSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);

@@ -1,5 +1,6 @@
 package com.integrationTests;
 
+import com.RestPageImpl;
 import com.dto.paymentCardsDto.CreatePaymentCardDTO;
 import com.dto.paymentCardsDto.PaymentCardDTO;
 import com.dto.paymentCardsDto.UpdatePaymentCardDTO;

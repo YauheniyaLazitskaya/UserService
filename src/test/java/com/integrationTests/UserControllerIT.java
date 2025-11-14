@@ -1,5 +1,6 @@
 package com.integrationTests;
 
+import com.RestPageImpl;
 import com.dto.usersDto.*;
 import com.entities.User;
 import com.repositories.*;
