@@ -7,6 +7,10 @@ import java.time.LocalDate;
 
 @Data
 public class CreateUserDTO {
+    @NotBlank(message = "Password can't be empty.")
+    @Size(min = 6, message = "Password must be more than 6 characters.")
+    private String password;
+
     @NotBlank(message = "Name can't be empty.")
     @Size(max = 20, min = 2, message = "Name must be more than 2 and less than 20 characters.")
     private String name;
@@ -25,6 +29,4 @@ public class CreateUserDTO {
     private LocalDate birthDate;
 
     private boolean active = true;
-
-
 }

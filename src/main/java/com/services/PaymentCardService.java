@@ -6,9 +6,12 @@ import com.exceptions.PaymentCardException;
 import com.exceptions.UserException;
 import com.mappers.PaymentCardMapper;
 import com.repositories.*;
+import com.specifications.PaymentCardSpecification;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class PaymentCardService {
+    @Value("${app.constraints.payment-cards.max-count}")
+    private int maxCardsLimit;
     private final PaymentCardRepository paymentCardRepository;
     private final UserRepository userRepository;
     private final PaymentCardMapper paymentCardMapper;
@@ -34,8 +39,9 @@ public class PaymentCardService {
     public PaymentCardDTO createPaymentCard(Integer userId, CreatePaymentCardDTO createPaymentCardDTO) {
         User user = userRepository.findById(userId).orElseThrow(()
                 -> new UserException("User not found with id: " + userId));
-        if(user.getPaymentCards().size()>5)
-            throw new PaymentCardException("The card owner already has 5 cards. Creating a new card is not possible.");
+        if(user.getPaymentCards().size()>maxCardsLimit)
+            throw new PaymentCardException("The card owner already has " + maxCardsLimit
+                    + " cards. Creating a new card is not possible.");
         PaymentCard paymentCard = paymentCardMapper.toEntity(createPaymentCardDTO);
         if(paymentCardRepository.findByNumber(paymentCard.getNumber()).isPresent())
             throw new PaymentCardException("Payment card with this number ("
@@ -90,7 +96,15 @@ public class PaymentCardService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PaymentCardDTO> getAllPaymentCards(int page, int size){
+    public Page<PaymentCardDTO> getAllPaymentCards(PaymentCardFilterDTO filter,int page, int size){
+        Specification<PaymentCard> spec = Specification.where(null);
+
+        if (filter != null) {
+            spec = spec.and(PaymentCardSpecification.hasNumber(filter.getNumber()))
+                    .and(PaymentCardSpecification.hasHolder(filter.getHolder()))
+                    .and(PaymentCardSpecification.hasExpirationDate(filter.getExpirationDate()))
+                    .and(PaymentCardSpecification.isActive(filter.getActive()));
+        }
         return paymentCardRepository.findAll(PageRequest.of(page, size)).map(paymentCardMapper::toDto);
     }
 

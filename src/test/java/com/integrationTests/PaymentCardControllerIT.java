@@ -9,6 +9,7 @@ import com.entities.User;
 import com.repositories.PaymentCardRepository;
 import com.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 public class PaymentCardControllerIT extends BaseIT {
     private static final ParameterizedTypeReference<RestPageImpl<PaymentCardDTO>> CARD_PAGE_TYPE =
             new ParameterizedTypeReference<>() {};

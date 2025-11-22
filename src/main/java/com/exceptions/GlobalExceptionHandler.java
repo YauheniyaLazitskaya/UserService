@@ -3,6 +3,7 @@ package com.exceptions;
 import com.dto.ExceptionDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -14,9 +15,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionDTO> handleUserException(UserException ex) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         if (ex.getMessage().contains("not found")) {
-            status = HttpStatus.NOT_FOUND; // 404
+            status = HttpStatus.NOT_FOUND;
         } else if (ex.getMessage().contains("already")) {
-            status = HttpStatus.CONFLICT; // 409
+            status = HttpStatus.CONFLICT;
         }
         ExceptionDTO userEx = new ExceptionDTO(status.value(), ex.getMessage());
         return new ResponseEntity<>(userEx, status);
@@ -32,6 +33,22 @@ public class GlobalExceptionHandler {
         }
         ExceptionDTO cardEx = new ExceptionDTO(status.value(), ex.getMessage());
         return new ResponseEntity<>(cardEx, status);
+    }
+
+    @ExceptionHandler(KeycloakException.class)
+    public ResponseEntity<ExceptionDTO> handleKeycloakException(KeycloakException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        if (ex.getMessage().toLowerCase().contains("unauthorized") || ex.getMessage().contains("401")) {
+            status = HttpStatus.UNAUTHORIZED;
+        }
+        return new ResponseEntity<>(new ExceptionDTO(status.value(), ex.getMessage()), status);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionDTO> handleAccessDeniedException(AccessDeniedException ex) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        return new ResponseEntity<>(new ExceptionDTO(status.value(),
+                "Access denied. You don't have permission to access this resource."), status);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
