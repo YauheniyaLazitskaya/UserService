@@ -32,6 +32,9 @@ public class User extends AuditableEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
+    @Column(name = "keycloak_id", unique = true)
+    private String keycloakId;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<PaymentCard> paymentCards = new ArrayList<>();
 
@@ -43,6 +46,16 @@ public class User extends AuditableEntity {
         this.birthDate = birthDate;
         this.email = email;
         this.active = active;
+    }
+
+    public User(String name, String surname, LocalDate birthDate, String email,
+                boolean active, String keycloakId) {
+        this.name = name;
+        this.surname = surname;
+        this.birthDate = birthDate;
+        this.email = email;
+        this.active = active;
+        this.keycloakId = keycloakId;
     }
 
     public void addPaymentCard(PaymentCard card) {

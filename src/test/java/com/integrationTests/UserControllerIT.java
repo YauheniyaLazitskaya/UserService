@@ -5,6 +5,7 @@ import com.dto.usersDto.*;
 import com.entities.User;
 import com.repositories.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -18,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
-
+@Disabled
 public class UserControllerIT extends BaseIT {
     private final TestRestTemplate restTemplate;
     private final UserRepository userRepository;

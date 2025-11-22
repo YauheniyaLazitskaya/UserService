@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,38 +20,36 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody CreateUserDTO createUserDTO){
-        UserDTO userDAO = userService.createUser(createUserDTO);
-        return new ResponseEntity<>(userDAO, HttpStatus.CREATED);
+        UserDTO userDTO = userService.createUser(createUserDTO);
+        return new ResponseEntity<>(userDTO, HttpStatus.CREATED);
     }
 
     @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('admin') or @securityCheck.isUserOwner(#userId, authentication)")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Integer userId,
                                               @Valid @RequestBody UpdateUserDTO newUserDTO){
-        try {
             UserDTO userDTO = userService.updateUserById(userId, newUserDTO);
             return ResponseEntity.ok(userDTO);
-        }catch (Exception e){
-            System.out.println("------------------------------ОШИБКА-----------------------------");
-            e.printStackTrace();
-            System.out.println("-------------------------------КОНЕЦ------------------------------");
-        }
-        return null;
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('admin') or @securityCheck.isUserOwner(#id, authentication)")
     public ResponseEntity<UserDTO> getUser(@PathVariable Integer id){
         UserDTO userDTO = userService.getUserById(id);
         return ResponseEntity.ok(userDTO);
     }
 
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> getAllUsers(@RequestParam(defaultValue = "0") int page,
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<Page<UserDTO>> getAllUsers(@ModelAttribute UserFilterDTO filter,
+                                                     @RequestParam(defaultValue = "0") int page,
                                                      @RequestParam(defaultValue = "10") int size){
-        Page<UserDTO> userDTOPage = userService.getAllUsers(page, size);
+        Page<UserDTO> userDTOPage = userService.getAllUsers(filter, page, size);
         return ResponseEntity.ok(userDTOPage);
     }
 
     @PutMapping("/{userId}/activity")
+    @PreAuthorize("hasRole('admin') or @securityCheck.isUserOwner(#userId, authentication)")
     public ResponseEntity<UserDTO> setActivityUser(@PathVariable Integer userId,
                                                    @RequestParam Boolean status){
         UserDTO userDTO = userService.setActivityUserById(userId, status);
@@ -58,6 +57,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('admin') or @securityCheck.isUserOwner(#id, authentication)")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id){
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();

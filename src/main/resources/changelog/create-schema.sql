@@ -37,3 +37,12 @@ CREATE TABLE IF NOT EXISTS payment_cards (
 CREATE INDEX IF NOT EXISTS idx_payment_cards_user_id ON payment_cards(user_id);
 
 --rollback DROP INDEX IF EXISTS idx_payment_cards_user_id;
+
+
+--changeset program:004-add-keycloak-id-to-users
+--comment: Добавление колонки keycloak_id для связи с Keycloak и создание индекса для неё
+ALTER TABLE users
+    ADD COLUMN keycloak_id VARCHAR(255);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_keycloak_id ON users(keycloak_id);
+--rollback ALTER TABLE users DROP COLUMN keycloak_id;
